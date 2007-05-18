@@ -2,3 +2,9 @@ Revision history for Perl extension Net::Jaiku.
 
 0.01.00  2007-04-15
 	- original version released to CPAN
+
+0.02.00  2007-05-19
+	* Fixed auth parameters
+	* Added icons
+	* get*Presence now calls /presence/last/json
+	* Added reverse icon lookups and groupings

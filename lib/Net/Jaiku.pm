@@ -1,11 +1,12 @@
 package Net::Jaiku;
 
-$VERSION ="0.0100";
+$VERSION ="0.0200";
 use warnings;
 use strict;
 
 use LWP::UserAgent;
 use JSON::Any;
+use HTML::Entities;
 
 sub new {
     my $class = shift;
@@ -49,6 +50,16 @@ sub auth {
 	}
 	return {};
 }
+sub auth_query {
+	my $self = shift;
+	if ($self->username && $self->userkey){
+		return sprintf('?user=%s&personal_key=%s',
+			$self->username,
+			$self->userkey,
+		)
+	}
+	return '';
+}
 
 
 sub getMyFeed {
@@ -67,8 +78,8 @@ sub getFeed {
 	return undef if $arg{user} && ! $self->auth;
 
     my $req = $self->{ua}->get(
-		'http://'.(($arg{user}) ? "$arg{user}." : '').'jaiku.com/feed/json',
-		$self->auth,
+		'http://'.(($arg{user}) ? "$arg{user}." : '').'jaiku.com/feed/json'.
+		$self->auth_query,
 	);
     return ($req->is_success) ?  HashInflator->new( JSON::Any->jsonToObj($req->content) ) : undef;
 }
@@ -84,10 +95,15 @@ sub getUserPresence {
 	$arg{user} ||= $self->username;
 
     my $req = $self->{ua}->get(
-		'http://'.$arg{user}.'.jaiku.com/presence/json',
-		$self->auth,
+		'http://'.$arg{user}.'.jaiku.com/presence/last/json'.
+		$self->auth_query,
 	);
-    return ($req->is_success) ?  HashInflator->new( JSON::Any->jsonToObj($req->content) ) : undef;
+	if ($req->is_success){
+		my $rv = HashInflator->new( JSON::Any->jsonToObj($req->content) );
+		#decode_entities( $rv->{line} );
+		return $rv;
+	}
+	return undef;
 }
 
 sub getMyInfo {
@@ -101,8 +117,8 @@ sub getUserInfo {
 	$arg{user} ||= $self->username;
 
     my $req = $self->{ua}->get(
-		'http://'.$arg{user}.'.jaiku.com/json',
-		$self->auth,
+		'http://'.$arg{user}.'.jaiku.com/json'.
+		$self->auth_query,
 	);
 	if ($req->is_success){
 		my $content = $req->content;
@@ -126,14 +142,68 @@ sub setPresence {
 	);
     if ($req->is_success) {
     	my $rv = JSON::Any->jsonToObj($req->content);
-    	return lc($rv->{status}) eq 'ok'
+    	return lc($rv->{status}) eq 'ok';
     }
     return undef;
 }
 
-package HashInflator;
+# Class methods
 
-use Data::Dumper;
+our %JAIKU_ICONS = (
+	# Original names
+	beer => 322, coffee => 319, computing => 329, eat => 341, home => 392, hurry => 399, morning => 400, sleep => 363, song => 367, toaster => 377, airplain => 316, bike => 388, bus => 317, car => 401, luggage => 373, metro => 372, taxi => 375, train => 378, tram => 304, walk => 325, theatre => 395, happy => 393, love => 347, uzi => 308, snorkeling => 364, bomb => 310, straitjacket => 371, pils => 389, grumpy => 318, megaphone => 352, game => 331, blading => 387, shop => 396, rollator => 358, football => 339, loudspeaker => 303, driller => 333, binoculars => 323, 'ice cream' => 381, toiletpaper => 394, balloons => 348, book => 354, spraycan => 368, scull => 361, wallclock => 326, 'ear muffs' => 346, tv => 328, makeup => 383, lifejacket => 391, storm => 370,
+	# Cleaned names
+	airplane => 316, aeroplane => 316, pills => 389, 'walking frame' => 358, drill => 333, skull => 361, clock => 326
+);
+
+our %iconsByCategory = (
+	Transport =>
+		[301, 304, 316, 317, 358, 372, 375, 378, 379, 401],
+	Weaponry =>
+		[308, 310, 343],
+	'Household items' =>
+		[302, 324, 326, 323, 327, 348, 349, 353, 354, 373, 377, 380, 383, 384, 386, 389, 394, 396, 397],
+	'Audio Visual' =>
+		[303, 305, 312, 314, 320, 328, 329, 330, 331, 342, 346, 336, 351, 352, 376],
+	Clothing =>
+		[306, 311, 335, 340, 344, 345, 391, 325],
+	'Food and beverages' =>
+		[315, 319, 322, 334, 341, 360, 366, 369, 381, 385, 390],
+	Sport =>
+		[307, 321, 339, 359, 362, 364, 387, 388],
+	Activities =>
+		[313, 382, 395, 399],
+	Tools =>
+		[309, 333, 332, 350, 368],
+	'Generic icons' =>
+		[337, 356],
+	Symbols =>
+		[338, 357, 363, 367, 347, 392],
+	Weather =>
+		[365, 370, 374, 398, 400],
+	Misc =>
+		[318, 355, 361, 371, 393, 402, 403]
+);
+
+our %iconById = (
+	301 => 'car', 302 => 'alarmclock', 303 => 'loudspeaker', 304 => 'tram', 305 => 'casette', 306 => 'underware', 307 => 'rollerblade', 308 => 'uzi', 309 => 'scoop', 310 => 'bomb', 311 => 'bra', 312 => 'videotape', 313 => 'cigarettes', 314 => 'vinyl', 315 => 'champaign', 316 => 'airplain', 317 => 'bus', 318 => 'grumpy', 319 => 'coffee', 320 => 'camera', 321 => 'basketball', 322 => 'beer', 323 => 'binoculars', 324 => 'boiler', 325 => 'walk', 326 => 'wallclock', 327 => 'trashcan', 328 => 'tv', 329 => 'computing', 330 => 'videocamera', 331 => 'game', 332 => 'cone', 333 => 'driller', 334 => 'popcorn', 335 => 'playshirt', 336 => 'disc', 337 => 'event', 338 => 'exclamationmark', 339 => 'football', 340 => 'footballshoe', 341 => 'eat', 342 => 'gameboy', 343 => 'grenade', 344 => 'hand', 345 => 'hanger', 346 => 'hearingprotector', 347 => 'love', 348 => 'balloons', 349 => 'clock', 350 => 'barrier', 351 => 'laptop', 352 => 'megaphone', 353 => 'microwave', 354 => 'book', 355 => 'middlefinger', 356 => 'notes', 357 => 'question', 358 => 'rollator', 359 => 'shuttlecock', 360 => 'salt', 361 => 'scull', 362 => 'sk8', 363 => 'sleep', 364 => 'snorkeling', 365 => 'snowflake', 366 => 'soda', 367 => 'song', 368 => 'spraycan', 369 => 'sticks', 370 => 'storm', 371 => 'straitjacket', 372 => 'metro', 373 => 'luggage', 374 => 'sun', 375 => 'taxi', 376 => 'technics', 377 => 'toaster', 378 => 'train', 379 => 'wheelchair', 380 => 'zippo', 381 => 'icecream', 382 => 'movie', 383 => 'makeup', 384 => 'bandaid', 385 => 'wine', 386 => 'clean', 387 => 'blading', 388 => 'bike', 389 => 'pils', 390 => 'picnic', 391 => 'lifejacket', 392 => 'home', 393 => 'happy', 394 => 'toiletpaper', 395 => 'theatre', 396 => 'shop', 397 => 'search', 398 => 'cloudy', 399 => 'hurry', 400 => 'morning', 401 => 'car', 402 => 'baby-boy', 403 => 'baby-girl'
+);
+
+our %iconByName = (
+	# Original names
+	reverse %iconById,
+	# Cleaned names
+	airplane => 316, aeroplane => 316, pills => 389, 'walking frame' => 358, drill => 333, skull => 361, clock => 326
+);
+
+sub findIcon {
+	my $class = shift;
+	my $icon = shift || $class;
+	return $class::iconByName{lc $icon} || undef;
+}
+
+
+package HashInflator;
 
 sub new {
 	my $class = shift;

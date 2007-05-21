@@ -8,3 +8,7 @@ Revision history for Perl extension Net::Jaiku.
 	* Added icons
 	* get*Presence now calls /presence/last/json
 	* Added reverse icon lookups and groupings
+
+0.03.00  2007-05-21
+	* Added getContactsFeed
+	* Fixed some tests

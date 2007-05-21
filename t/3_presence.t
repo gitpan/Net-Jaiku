@@ -11,12 +11,12 @@ SKIP: {
 	);
 
 	$rv = $jaiku->getUserPresence(user => 'merlyn');
-	ok( $rv->line );
+	ok( $rv->title );
 	ok( $rv->user->nick eq 'merlyn' );
 	ok( lc $rv->user->url eq lc 'http://merlyn.jaiku.com' );
 
 	my $rv = $jaiku->getMyPresence;
-	ok( $rv->line );
+	ok( $rv->title );
 	ok( $rv->user->nick eq $jaiku->username );
 	ok( lc $rv->user->url eq lc 'http://'.$jaiku->username.'.jaiku.com' );
 

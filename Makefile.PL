@@ -8,6 +8,7 @@ WriteMakefile(
 		'Test::More'     =>  0,
 		'LWP::UserAgent' =>  0.14,
 		'JSON::Any'      => 0,
+		'Params::Validate'	=> 0,
 	},
     ($] >= 5.005 ?
       (ABSTRACT_FROM => 'lib/Net/Jaiku.pm',

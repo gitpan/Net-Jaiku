@@ -1,12 +1,13 @@
 package Net::Jaiku;
 
-$VERSION ="0.0300";
+$VERSION ="0.0400";
 use warnings;
 use strict;
 
 use LWP::UserAgent;
 use JSON::Any;
 use HTML::Entities;
+use Params::Validate qw/validate SCALAR ARRAYREF BOOLEAN/;
 
 sub new {
     my $class = shift;
@@ -14,6 +15,8 @@ sub new {
 
     $conf{ua} = LWP::UserAgent->new();
     $conf{ua}->env_proxy();
+	$conf{ua}->timeout($conf{timeout}) if ($conf{timeout});
+	delete($conf{timeout});
 
 	$conf{username} ||= '';
 	$conf{userkey}  ||= '';
@@ -141,9 +144,50 @@ sub getUserInfo {
 	return undef;
 }
 
-sub setPresence {
+sub getChannelFeed {
 	my $self = shift;
 	my %arg = @_;
+
+	return undef unless $arg{channel};
+
+	$arg{channel} =~ s/^#//;
+
+    my $req = $self->{ua}->get(
+		'http://jaiku.com/channel/'.$arg{channel}.'/feed/json'.
+		$self->auth_query,
+	);
+    return ($req->is_success) ?  HashInflator->new( JSON::Any->jsonToObj($req->content) ) : undef;
+}
+
+
+sub setPresence {
+	my $self = shift;
+
+	my %arg = validate( @_, {
+		icon => {
+			type => SCALAR,
+			optional => 1,
+		},
+		message => {
+			type => SCALAR,
+			optional => 1,
+		},
+		location => {
+			type => SCALAR | ARRAYREF,
+			optional => 1,
+		},
+		generated => {
+			type => BOOLEAN,
+			optional => 1,
+		},
+	});
+
+	# Now turn them into something interesting
+	$arg{icon} =~ s/(\D+)/$Net::Jaiku::iconByName{$1}/;
+	$arg{location} = join(', ', @{ $arg{location} }[0,2] )
+		if ref $arg{location} eq 'ARRAY';
+	$arg{generated} = $arg{generated} ? 1 : 0;
+
     my $req = $self->{ua}->post(
 		'http://api.jaiku.com/json',
 		{
@@ -162,6 +206,7 @@ sub setPresence {
 
 # Class methods
 
+# DEPRECATED: Don't use it!
 our %JAIKU_ICONS = (
 	# Original names
 	beer => 322, coffee => 319, computing => 329, eat => 341, home => 392, hurry => 399, morning => 400, sleep => 363, song => 367, toaster => 377, airplain => 316, bike => 388, bus => 317, car => 401, luggage => 373, metro => 372, taxi => 375, train => 378, tram => 304, walk => 325, theatre => 395, happy => 393, love => 347, uzi => 308, snorkeling => 364, bomb => 310, straitjacket => 371, pils => 389, grumpy => 318, megaphone => 352, game => 331, blading => 387, shop => 396, rollator => 358, football => 339, loudspeaker => 303, driller => 333, binoculars => 323, 'ice cream' => 381, toiletpaper => 394, balloons => 348, book => 354, spraycan => 368, scull => 361, wallclock => 326, 'ear muffs' => 346, tv => 328, makeup => 383, lifejacket => 391, storm => 370,
@@ -209,10 +254,12 @@ our %iconByName = (
 	airplane => 316, aeroplane => 316, pills => 389, 'walking frame' => 358, drill => 333, skull => 361, clock => 326
 );
 
+our @OfficialIconList = (322, 319, 329, 341, 392, 399, 400, 363, 367, 377, 316, 388, 317, 401, 373, 372, 375, 378, 304, 325, 395, 393, 347, 308, 364, 310, 371, 389, 318, 352, 331, 387, 396, 358, 339, 303, 333, 323, 381, 394, 348, 354, 368, 361, 326, 346, 328, 383, 391, 370);
+
 sub findIcon {
 	my $class = shift;
 	my $icon = shift || $class;
-	return $class::iconByName{lc $icon} || undef;
+	return $iconByName{lc $icon} || undef;
 }
 
 
@@ -264,7 +311,9 @@ Net::Jaiku - A perl interface to jaiku.com's API
 	my $p = $jaiku->getMyPresence;
 	print $p->user->url;
 
-	my $rv = $jaiku->setPresence('Reading a book');
+	my $rv = $jaiku->setPresence(
+		message => 'Reading a book'
+	);
 
 =head1 ABSTRACT
 
@@ -292,6 +341,11 @@ This is a jaiku.com username. I<this bit>.jaiku.com
 
 The user's key can be obtained by visiting http://api.jaiku.com when
 logged in as the user.
+
+=item * C<<timeout => $seconds>>
+
+The number of seconds to wait before giving up on the call to Jaiku.
+(Optional)
 
 =back
 
@@ -323,6 +377,10 @@ user is logged it, it will return undef.
 =item * C<getContactsFeed()>
 
 Retrieve a feed of all your contacts and their presences.
+
+=item * C<getChannelFeed( channel => $string )>
+
+Retrieve a feed of the latest posts to a channel.
 
 =item * B<RETURN VALUE>
 
@@ -392,6 +450,12 @@ following keys are available:
 
 =back
 
+=item * C<setPresence( message => $string, location => $string_or_arrayref, icon => $integer_or_string, generated => $boolean )>
+
+Set the Jaiku presence for the current user. All options are optional,
+but it would be pointless to not set a C<message> or a C<location>.
+
+
 =back
 
 
@@ -455,6 +519,7 @@ Returns the current username (after optionally setting)
 Returns the current username (after optionally setting)
 
 =back
+
 
 =head1 NOTES
 

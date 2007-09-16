@@ -1,5 +1,22 @@
 Revision history for Perl extension Net::Jaiku.
 
+0.05.00  2007-09-16
+	* Added docs for setPresence and validation.
+	* Now requires Params::Validate
+
+0.04.00  2007-06-04
+	* Added a 'timeout' parameter to the contructor
+
+0.03.00  2007-05-21
+	* Added getContactsFeed
+	* Fixed some tests
+
+0.02.00  2007-05-19
+	* Fixed auth parameters
+	* Added icons
+	* get*Presence now calls /presence/last/json
+	* Added reverse icon lookups and groupings
+
 0.01.00  2007-04-15
 	- original version released to CPAN
 
@@ -9,6 +26,3 @@ Revision history for Perl extension Net::Jaiku.
 	* get*Presence now calls /presence/last/json
 	* Added reverse icon lookups and groupings
 
-0.03.00  2007-05-21
-	* Added getContactsFeed
-	* Fixed some tests

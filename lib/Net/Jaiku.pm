@@ -1,6 +1,6 @@
 package Net::Jaiku;
 
-$VERSION ="0.0500";
+$VERSION ="0.0501";
 use warnings;
 use strict;
 
@@ -335,16 +335,16 @@ The C<new> constructor takes the following attributes:
 
 =over 4
 
-=item * C<<username => $string>>
+=item * C<<username =E<gt> $string>>
 
 This is a jaiku.com username. I<this bit>.jaiku.com
 
-=item * C<<userkey => $string>>
+=item * C<<userkey =E<gt> $string>>
 
 The user's key can be obtained by visiting http://api.jaiku.com when
 logged in as the user.
 
-=item * C<<timeout => $seconds>>
+=item * C<<timeout =E<gt> $seconds>>
 
 The number of seconds to wait before giving up on the call to Jaiku.
 (Optional)
@@ -365,7 +365,7 @@ L<Net::Jaiku> has the following methods:
 
 Returns the public feed as seen on the front page.
 
-=item * C<getUserFeed( user => $string )>
+=item * C<getUserFeed( user =E<gt> $string )>
 
 Returns a hashref of the feed for the given user. If no user is
 specified, it will return the feed for the current user. If no
@@ -380,7 +380,7 @@ user is logged it, it will return undef.
 
 Retrieve a feed of all your contacts and their presences.
 
-=item * C<getChannelFeed( channel => $string )>
+=item * C<getChannelFeed( channel =E<gt> $string )>
 
 Retrieve a feed of the latest posts to a channel.
 
@@ -391,25 +391,25 @@ keys are available:
 
 =over 4
 
-=item * title
+=item * C<title>
 
-=item * url
+=item * C<url>
 
-=item * stream[n]->icon
+=item * C<stream[n]-E<gt>icon>
 
-=item * stream[n]->content
+=item * C<stream[n]-E<gt>content>
 
-=item * stream[n]->created_at
+=item * C<stream[n]-E<gt>created_at>
 
-=item * stream[n]->created_at_relative
+=item * C<stream[n]-E<gt>created_at_relative>
 
-=item * stream[n]->comments
+=item * C<stream[n]-E<gt>comments>
 
-=item * stream[n]->url
+=item * C<stream[n]-E<gt>url>
 
-=item * stream[n]->id
+=item * C<stream[n]-E<gt>id>
 
-=item * stream[n]->title
+=item * C<stream[n]-E<gt>title>
 
 =back
 
@@ -420,7 +420,7 @@ keys are available:
 
 =over 4
 
-=item * C<getUserPresence( user => $string )>
+=item * C<getUserPresence( user =E<gt> $string )>
 
 Returns the 'presence' for the given user. If no user is
 specified, it will return the feed for the current user. If no
@@ -438,24 +438,27 @@ following keys are available:
 
 =over 4
 
-=item * line
+=item * C<line>
 
-=item * user->avatar
+=item * C<user-E<gt>avatar>
 
-=item * user->url
+=item * C<user-E<gt>url>
 
-=item * user->nick
+=item * C<user-E<gt>nick>
 
-=item * user->first_name
+=item * C<user-E<gt>first_name>
 
-=item * user->last_name
+=item * C<user-E<gt>last_name>
 
 =back
 
-=item * C<setPresence( message => $string, location => $string_or_arrayref, icon => $integer_or_string, generated => $boolean )>
+=item * C<setPresence( message =E<gt> $string,
+location =E<gt> $string_or_arrayref, icon =E<gt> $integer_or_string,
+generated =E<gt> $boolean )>
 
 Set the Jaiku presence for the current user. All options are optional,
-but it would be pointless to not set a C<message> or a C<location>.
+but it would be pointless to not set either a C<message> or a
+C<location>.
 
 
 =back
@@ -465,7 +468,7 @@ but it would be pointless to not set a C<message> or a C<location>.
 
 =over 4
 
-=item * C<getUserInfo( user => $string )>
+=item * C<getUserInfo( user =E<gt> $string )>
 
 Returns information for the given user. If no user is
 specified, it will return the feed for the current user. If no
@@ -483,25 +486,25 @@ following keys are available:
 
 =over 4
 
-=item * avatar
+=item * C<avatar>
 
-=item * url
+=item * C<url>
 
-=item * nick
+=item * C<nick>
 
-=item * first_name
+=item * C<first_name>
 
-=item * last_name
+=item * C<last_name>
 
-=item * contacts[n]->avatar
+=item * C<contacts[n]-E<gt>avatar>
 
-=item * contacts[n]->url
+=item * C<contacts[n]-E<gt>url>
 
-=item * contacts[n]->nick
+=item * C<contacts[n]-E<gt>nick>
 
-=item * contacts[n]->first_name
+=item * C<contacts[n]-E<gt>first_name>
 
-=item * contacts[n]->last_name
+=item * C<contacts[n]-E<gt>last_name>
 
 =back
 

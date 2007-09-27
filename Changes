@@ -1,5 +1,11 @@
 Revision history for Perl extension Net::Jaiku.
 
+0.05.01  2007-09-28
+	* Documentation changes only. Trying to get '>' to appear on
+	  search.cpan.org's documentation view
+	* Added a test for Pod if you have Test::Pod installed. Skips
+	  nicely otherwise
+
 0.05.00  2007-09-28
 	* Checked to see if icon, location and generated are set before we
 	  try and tidy them up in setPresence

@@ -1,10 +1,15 @@
 Revision history for Perl extension Net::Jaiku.
 
-0.05.00  2007-09-16
+0.05.00  2007-09-28
+	* Checked to see if icon, location and generated are set before we
+	  try and tidy them up in setPresence
+	  - Thanks Christiaan Vertonghen
+	* Fixed a test that assumed everything in a presence had an id.
+	  Comments don't, they only have a comment_id.
+
+0.04.00  2007-09-16
 	* Added docs for setPresence and validation.
 	* Now requires Params::Validate
-
-0.04.00  2007-06-04
 	* Added a 'timeout' parameter to the contructor
 
 0.03.00  2007-05-21

@@ -1,6 +1,7 @@
 use Test::More tests => 8;
 use Net::Jaiku;
 #use LWP::Debug qw(+ -conns);
+use Data::Dumper;
 
 $jaiku = Net::Jaiku->new(
 	username => $ENV{JAIKU_USER} || '',
@@ -25,6 +26,7 @@ SKIP: {
 
 	$rv = $jaiku->getContactsFeed;
 	ok( @{ $rv->stream } > 0 );
-	ok( $rv->stream->[0]->id =~ /^\d+$/ );
+	my $id = $rv->stream->[0]->id || $rv->stream->[0]->comment_id;
+	ok( $id =~ /^\d+$/ );
 
 }

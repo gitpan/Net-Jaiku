@@ -10,7 +10,7 @@ SKIP: {
 		userkey  => $ENV{JAIKU_KEY}
 	);
 
-	my $test_line = 'Testing Net::Jaiku';
+	my $test_line = 'Testing Net::Jaiku '.$Net::Jaiku::VERSION;
 	ok( $jaiku->setPresence(message => $test_line) );
 
 	diag("Waiting 2 seconds before retrieving");

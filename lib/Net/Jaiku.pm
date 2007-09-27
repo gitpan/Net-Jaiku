@@ -1,6 +1,6 @@
 package Net::Jaiku;
 
-$VERSION ="0.0400";
+$VERSION ="0.0500";
 use warnings;
 use strict;
 
@@ -183,10 +183,12 @@ sub setPresence {
 	});
 
 	# Now turn them into something interesting
-	$arg{icon} =~ s/(\D+)/$Net::Jaiku::iconByName{$1}/;
+	$arg{icon} =~ s/(\D+)/$Net::Jaiku::iconByName{$1}/
+		if exists $arg{icon} && $arg{icon} =~ /\D/;
 	$arg{location} = join(', ', @{ $arg{location} }[0,2] )
-		if ref $arg{location} eq 'ARRAY';
-	$arg{generated} = $arg{generated} ? 1 : 0;
+		if exists $arg{location} && ref $arg{location} eq 'ARRAY';
+	$arg{generated} = $arg{generated} ? 1 : 0
+		if exists $arg{generated};
 
     my $req = $self->{ua}->post(
 		'http://api.jaiku.com/json',
